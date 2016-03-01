@@ -129,5 +129,18 @@ class Figure():
         # Create aliases for "upper" / "top" and "lower" / "bottom"
         location.replace("top ", "upper ")
         location.replace("bottom ", "lower ")
-        # Add legend
-        axes.legend(loc=location)
+        # Avoid warning if no labels were given for plots
+        nb_labelled_plots = sum(["label" in plt[1] for plt in self.plots])
+        if nb_labelled_plots > 0:
+            # Add legend
+            axes.legend(loc=location)
+
+
+def plot(data, **kwargs):
+    """
+    """
+    figure = Figure(**kwargs)
+    # TODO: Fix API, support every plot type
+    for plt in data:
+        figure.plot(plt)
+    return figure
