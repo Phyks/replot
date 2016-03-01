@@ -141,8 +141,28 @@ class Figure():
 def plot(data, **kwargs):
     """
     """
+    # Init new figure
     figure = Figure(**kwargs)
-    # TODO: Fix API, support every plot type
-    for plt in data:
-        figure.plot(plt)
+    # data is a list of graphs commands
+    for graph in data:
+        # If we provide a tuple, handle it
+        if isinstance(graph, tuple):
+            args = ()
+            kwargs = {}
+            # First case, only two items provided
+            if len(graph) == 2:
+                # Parse args and kwargs according to type of items
+                if isinstance(graph[1], tuple):
+                    args = (graph[1],)
+                elif isinstance(graph[1], dict):
+                    kwargs = graph[1]
+            # Second case, at least 3 items provided
+            elif len(graph) > 2:
+                # Then, args and kwargs are well defined
+                args = (graph[1],)
+                kwargs = graph[2]
+            # Pass the correct argument to plot function
+            figure.plot(graph[0], *args, **kwargs)
+        else:
+            figure.plot(graph)
     figure.show()
