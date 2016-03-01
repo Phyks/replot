@@ -8,6 +8,9 @@ import numpy as np
 import seaborn.apionly as sns
 
 
+__VERSION__ = "0.0.1"
+
+
 # TODO: Remove it, this is interfering with matplotlib
 plt.rcParams['figure.figsize'] = (10.0, 8.0)  # Larger figures by default
 plt.rcParams['text.usetex'] = True  # Use LaTeX rendering

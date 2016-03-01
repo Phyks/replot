@@ -66,4 +66,14 @@ examples.
 
 ## License
 
-MIT license.
+This Python module is released under MIT license. Feel free to contribute and
+reuse. For more details, see `LICENSE.txt` file.
+
+
+## Thanks
+
+* [Matplotlib](http://matplotlib.org/) for their really good backend (but
+  not for their terrible API)
+* [Seaborn](https://github.com/mwaskom/seaborn) and
+  [prettyplotlib](http://blog.olgabotvinnik.com/prettyplotlib/) which gave me
+  the original idea.
