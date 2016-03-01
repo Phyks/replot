@@ -52,7 +52,11 @@ class Figure():
             figure, axes = plt.subplots()
             # Add plots
             for plot in self.plots:
-                axes.plot(*(plot[0]), **(plot[1]))
+                tmp_plots = axes.plot(*(plot[0]), **(plot[1]))
+                # Do not clip line at the axes boundaries to prevent extremas
+                # from being cropped.
+                for tmp_plot in tmp_plots:
+                    tmp_plot.set_clip_on(False)
             # Set properties
             axes.set_xlabel(self.xlabel)
             axes.set_ylabel(self.ylabel)
