@@ -138,4 +138,4 @@ def plot(data, **kwargs):
     # TODO: Fix API, support every plot type
     for plt in data:
         figure.plot(plt)
-    return figure
+    figure.show()
