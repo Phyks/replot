@@ -5,12 +5,7 @@ it, then we write a buffer on top of matplotlib API.
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn
-
-
-# Cancel seaborn modifications of matplotlib, we do not want to interfere in
-# any ways with matplotlib
-seaborn.reset_orig()
+import seaborn.apionly as sns
 
 
 # TODO: Remove it, this is interfering with matplotlib
@@ -47,9 +42,9 @@ class Figure():
         Actually render and show the figure.
         """
         # Tweak matplotlib to use seaborn
-        seaborn.set()
+        sns.set()
         # Plot using specified color palette
-        with seaborn.color_palette(self.palette, self.max_colors):
+        with sns.color_palette(self.palette, self.max_colors):
             # Create figure
             figure, axes = plt.subplots()
             # Add plots
@@ -65,7 +60,7 @@ class Figure():
             figure.show()
         # Do not forget to restore matplotlib state, in order not to interfere
         # with it.
-        seaborn.reset_orig()
+        sns.reset_orig()
 
 
     #def palette(self, palette):
