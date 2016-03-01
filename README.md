@@ -38,6 +38,22 @@ design in the API, or required feature!
     abstracts on top of `matplotlib` and do the actual render only when the
     figure is to be `show`n. Even after having called the `show` method, you
     can still change everything in your figure!</dd>
+
+    <dt>Does not interfere with `matplotlib`</dt>
+    <dd>You can still use the default `matplotlib` if you want, as
+    `matplotlib` state and parameters are not directly affected by this
+    module, contrary to what `seaborn` do when you import it for
+    instance.</dd>
+
+    <dt>Useful aliases</dt>
+    <dd>You think `loc="top left"` is easier to remember than `loc="upper
+    left"` in a `matplotlib.pyplot.legend()` call? No worry, this module
+    aliases it for you! (same for "bottom" with respect to "lower")</dd>
+
+    <dt>Automatic legend</dt>
+    <dd>If any of your plots contains a `label` keyword, a legend will be
+    added automatically on your graph (you can still explicitly tell it not to
+    add a legend by setting the `legend` attribute to `False`).</dd>
 </dl>
 
 
