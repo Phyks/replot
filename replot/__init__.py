@@ -8,15 +8,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn.apionly as sns
 
+from replot import adaptive_sampling
 from replot import exceptions as exc
 
 
 __VERSION__ = "0.0.1"
-
-# Constants
-DEFAULT_NB_SAMPLES = 1000
-DEFAULT_X_INTERVAL = np.linspace(-10, 10,
-                                 DEFAULT_NB_SAMPLES)
 
 
 def mpl_custom_rc_context():
@@ -130,7 +126,6 @@ class Figure():
         .. note:: ``kwargs`` arguments are directly passed to \
                     ``matplotlib.pyplot.plot``.
 
-        >>> with replot.figure() as fig: fig.plot(np.sin)
         >>> with replot.figure() as fig: fig.plot(np.sin, (-1, 1))
         >>> with replot.figure() as fig: fig.plot(np.sin, [-1, -0.9, …, 1])
         >>> with replot.figure() as fig: fig.plot([1, 2, 3], [4, 5, 6])
@@ -167,22 +162,25 @@ class Figure():
                 which the function should be evaluated. ``kwargs`` are passed \
                 directly to ``matplotlib.pyplot.plot`.
         """
-        # TODO: Better default interval and so on, adaptive plotting
         if len(args) == 0:
-            # No interval specified, using default one
-            x_values = DEFAULT_X_INTERVAL
-        elif isinstance(args[0], (list, np.ndarray)):
-            # List of points specified
-            x_values = args[0]
+            # If no interval specified, raise an issue
+            raise exc.InvalidParameterError(
+                "You should pass a plotting interval to the plot command.")
         elif isinstance(args[0], tuple):
-            # Interval specified, generate a list of points
-            x_values = np.linspace(args[0][0], args[0][1],
-                                   DEFAULT_NB_SAMPLES)
+            # Interval specified, use it and adaptive plotting
+            x_values, y_values = adaptive_sampling.sample_function(
+                data,
+                args[0],
+                tol=1e-3)
+        elif isinstance(args[0], (list, np.ndarray)):
+            # List of points specified, use them and compute values of the
+            # function
+            x_values = args[0]
+            y_values = [data(i) for i in x_values]
         else:
             raise exc.InvalidParameterError(
                 "Second parameter in plot command should be a tuple " +
                 "specifying plotting interval.")
-        y_values = [data(i) for i in x_values]
         self.plots.append(((x_values, y_values) + args[1:], kwargs))
 
     def _legend(self, axes):
@@ -218,9 +216,8 @@ def plot(data, **kwargs):
 
     >>> replot.plot([range(10),
                      (np.sin, (-5, 5)),
-                     np.cos,
                      (lambda x: np.sin(x) + 4, (-10, 10), {"linewidth": 10}),
-                     (lambda x: np.sin(x) - 4, {"linewidth": 10}),
+                     (lambda x: np.sin(x) - 4, (-10, 10), {"linewidth": 10}),
                      ([-i for i in range(5)], {"linewidth": 10})],
                     xlabel="some x label",
                     ylabel="some y label",
