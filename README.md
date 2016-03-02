@@ -28,7 +28,7 @@ design in the API, or required feature!
     <dd>Ever got annoyed by the fact that `matplotlib` can only plot point
     series and not evaluate a function _à la_ Mathematica? This module let
     you do things like `plot(sin, (-10, 10))` to plot a sine function between
-    -10 and 10.
+    -10 and 10, using adaptive sampling.
 
     <dt>Order of call of methods is no longer important</dt>
     <dd>When calling a method from `matplotlib`, it is directly applied to the
@@ -81,3 +81,5 @@ reuse. For more details, see `LICENSE.txt` file.
 * [Seaborn](https://github.com/mwaskom/seaborn) and
   [prettyplotlib](http://blog.olgabotvinnik.com/prettyplotlib/) which gave me
   the original idea.
+* [This code](http://central.scipy.org/item/53/1/adaptive-sampling-of-1d-functions)
+  from scipy central for a base code for adaptive sampling.
