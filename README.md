@@ -58,6 +58,9 @@ design in the API, or required feature!
     <dt>Use `LaTeX` rendering in `matplotlib`, if available.</dt>
     <dd>If `replot` finds `LaTeX` installed on your machine, it will overload
     `matplotlib` settings to use `LaTeX` rendering.</dd>
+
+    <dt>Handle subplots more easily</dt>
+    <dd>**TODO**</dd>
 </dl>
 
 

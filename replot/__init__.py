@@ -57,7 +57,9 @@ class Figure():
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        self.show()
+        if exception_type is None:
+            # Do not draw the figure if an exception was raised
+            self.show()
 
     def show(self):
         """
@@ -91,6 +93,32 @@ class Figure():
             # interfere with it.
             sns.reset_orig()
 
+    def apply_grid(self, grid_description):
+        """
+        Apply a grid layout on the figure (subplots). Subplots are based on \
+                defined groups (see ``group`` keyword to \
+                ``replot.Figure.plot``).
+
+        :param grid_description: A list of rows. Each row is a string \
+                containing the groups to display (can be seen as ASCII art).
+
+        .. note:: Groups are a single unicode character. If a group does not \
+                contain any plot, the resulting subplot will simply be empty.
+
+        >>> with replot.Figure() as fig: fig.apply_grid(["AAA",
+                                                         "BBC"
+                                                         "DEC"])
+        """
+        # Check that grid is not empty
+        if len(grid_description) == 0:
+            raise exc.InvalidParameterError("Grid cannot be an empty list.")
+        # Check that all rows have the same number of elements
+        for row in grid_description:
+            if len(row) != len(grid_description[0]):
+                raise exc.InvalidParameterError(
+                    "All rows must have the same number of elements.")
+        # TODO: Parse grid
+
     def plot(self, *args, **kwargs):
         """
         Plot something on the :class:`Figure` object.
@@ -111,8 +139,10 @@ class Figure():
 
         .. note:: You can use some :mod:`replot` specific keyword arguments:
 
-            - ``group`` which defines permits to group plots together, in \
-                    subplots (one unicode character maximum).
+            - ``group`` which permits to group plots together, in \
+                    subplots (one unicode character maximum). ``group`` \
+                    keyword will not affect the render unless you state \
+                    :mod:`replot` to use subplots.
 
         >>> with replot.figure() as fig: fig.plot(np.sin, (-1, 1))
         >>> with replot.figure() as fig: fig.plot(np.sin, [-1, -0.9, …, 1])
@@ -126,9 +156,12 @@ class Figure():
             raise exc.InvalidParameterError(
                 "You should pass at least one argument to this function.")
 
-        # Extra custom kwargs (the ones from replot but not matplotlib) from
+        # Extract custom kwargs (the ones from replot but not matplotlib) from
         # kwargs
-        kwargs, custom_kwargs = _handle_custom_plot_arguments(kwargs)
+        if kwargs is not None:
+            kwargs, custom_kwargs = _handle_custom_plot_arguments(kwargs)
+        else:
+            custom_kwargs = {}
 
         if hasattr(args[0], "__call__"):
             # We want to plot a function
@@ -255,7 +288,7 @@ def _handle_custom_plot_arguments(kwargs):
                 "Group name cannot be longer than one unicode character.")
         custom_kwargs["group"] = kwargs["group"]
         del kwargs["group"]
-        return (kwargs, custom_kwargs)
+    return (kwargs, custom_kwargs)
 
 
 def _plot_function(data, *args, **kwargs):
