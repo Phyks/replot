@@ -54,6 +54,10 @@ design in the API, or required feature!
     <dd>If any of your plots contains a `label` keyword, a legend will be
     added automatically on your graph (you can still explicitly tell it not to
     add a legend by setting the `legend` attribute to `False`).</dd>
+
+    <dt>Use `LaTeX` rendering in `matplotlib`, if available.</dt>
+    <dd>If `replot` finds `LaTeX` installed on your machine, it will overload
+    `matplotlib` settings to use `LaTeX` rendering.</dd>
 </dl>
 
 
