@@ -2,6 +2,8 @@
 The :mod:`replot` module is a (sane) Python plotting module, abstracting on top
 of Matplotlib.
 """
+import shutil
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn.apionly as sns
@@ -17,9 +19,23 @@ DEFAULT_X_INTERVAL = np.linspace(-10, 10,
                                  DEFAULT_NB_SAMPLES)
 
 
-# TODO: Remove it, this is interfering with matplotlib
-plt.rcParams['figure.figsize'] = (10.0, 8.0)  # Larger figures by default
-plt.rcParams['text.usetex'] = True  # Use LaTeX rendering
+def mpl_custom_rc_context():
+    """
+    Overload ``matplotlib.rcParams`` to enable advanced features if \
+            available. In particular, use LaTeX if available.
+
+    :returns: A ``matplotlib.rc_context`` object to use in a ``with`` \
+            statement.
+    """
+    custom_rc = {}
+    # Add LaTeX in rc if available
+    if(shutil.which("latex") is not None and
+       shutil.which("gs") is not None and
+       shutil.which("dvipng") is not None):
+        # LateX dependencies are all available
+        custom_rc["text.usetex"] = True
+        custom_rc["text.latex.unicode"] = True
+    return plt.rc_context(rc=custom_rc)
 
 
 class Figure():
@@ -69,29 +85,32 @@ class Figure():
         """
         Actually render and show the :class:`Figure` object.
         """
-        # Tweak matplotlib to use seaborn
-        sns.set()
-        # Plot using specified color palette
-        with sns.color_palette(palette=self.palette, n_colors=self.max_colors):
-            # Create figure
-            figure, axes = plt.subplots()
-            # Add plots
-            for plot_ in self.plots:
-                tmp_plots = axes.plot(*(plot_[0]), **(plot_[1]))
-                # Do not clip line at the axes boundaries to prevent extremas
-                # from being cropped.
-                for tmp_plot in tmp_plots:
-                    tmp_plot.set_clip_on(False)
-            # Set properties
-            axes.set_xlabel(self.xlabel)
-            axes.set_ylabel(self.ylabel)
-            axes.set_title(self.title)
-            self._legend(axes)
-            # Draw figure
-            figure.show()
-        # Do not forget to restore matplotlib state, in order not to interfere
-        # with it.
-        sns.reset_orig()
+        # Use custom matplotlib context
+        with mpl_custom_rc_context():
+            # Tweak matplotlib to use seaborn
+            sns.set()
+            # Plot using specified color palette
+            with sns.color_palette(palette=self.palette,
+                                   n_colors=self.max_colors):
+                # Create figure
+                figure, axes = plt.subplots()
+                # Add plots
+                for plot_ in self.plots:
+                    tmp_plots = axes.plot(*(plot_[0]), **(plot_[1]))
+                    # Do not clip line at the axes boundaries to prevent
+                    # extremas from being cropped.
+                    for tmp_plot in tmp_plots:
+                        tmp_plot.set_clip_on(False)
+                # Set properties
+                axes.set_xlabel(self.xlabel)
+                axes.set_ylabel(self.ylabel)
+                axes.set_title(self.title)
+                self._legend(axes)
+                # Draw figure
+                figure.show()
+            # Do not forget to restore matplotlib state, in order not to
+            # interfere with it.
+            sns.reset_orig()
 
     def plot(self, *args, **kwargs):
         """
