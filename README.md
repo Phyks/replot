@@ -82,7 +82,8 @@ design in the API, or required feature!
 ## Examples
 
 A more up to date doc is still to be written, but you can have a look at the
-`Examples.ipynb` [Jupyter](https://github.com/jupyter/notebook/) notebook for
+<a href="https://github.com/Phyks/replot/blob/master/Examples.ipynb">`Examples.ipynb`</a>
+[Jupyter](https://github.com/jupyter/notebook/) notebook for
 examples, which should cover most of the use cases.
 
 
