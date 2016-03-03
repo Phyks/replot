@@ -14,7 +14,8 @@ def parse_ascii(M):
     :param M: A list of strings, each string representing a row.
     :returns: A dict containing the width and height of the grid, and a \
             description of the grid as a list of subplots. Each subplot is a \
-            tuple of ((y_position, x_position), symbol, (rowspan, colspan)). \
+            tuple of \
+            ``((y_position, x_position), symbol, (rowspan, colspan))``. \
             Returns ``None`` if the matrix could not be parsed.
 
     .. note:: This function expects ``M`` to represent a valid rectangular \
