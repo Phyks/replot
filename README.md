@@ -71,7 +71,7 @@ design in the API, or required feature!
 
 A more up to date doc is still to be written, but you can have a look at the
 `Examples.ipynb` [Jupyter](https://github.com/jupyter/notebook/) notebook for
-examples.
+examples, which should cover most of the use cases.
 
 
 ## License
