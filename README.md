@@ -22,7 +22,7 @@ design in the API, or required feature!
     <dd>Ever got tired of having to start any figure with a call to
     `matplotlib.pyplot.subplots()`? This module abstracts it using `with`
     statement. New figures are defined by a `with` statement, and are `show`n
-    automatically upon leaving the `with` context.
+    automatically (or `save`d) upon leaving the `with` context.
 
     <dt>Plot functions</dt>
     <dd>Ever got annoyed by the fact that `matplotlib` can only plot point
@@ -60,6 +60,9 @@ design in the API, or required feature!
     `matplotlib` settings to use `LaTeX` rendering.</dd>
 
     <dt>Handle subplots more easily</dt>
+    <dd>**TODO**</dd>
+
+    <dt>"Gridify"</dt>
     <dd>**TODO**</dd>
 </dl>
 
