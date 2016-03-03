@@ -67,7 +67,7 @@ design in the API, or required feature!
     <code>LaTeX</code> rendering.</dd>
 
     <dt>Handle subplots more easily</dt>
-    <dd>Have you ever struggled with <code>matplotlib</em> to define a subplot
+    <dd>Have you ever struggled with <code>matplotlib</code> to define a subplot
     grid and arrange your plot? <code>replot</code> lets you describe your
     grid visually using ascii art!</dd>
 
