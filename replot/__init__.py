@@ -4,8 +4,15 @@ of Matplotlib.
 """
 import collections
 import math
+import os
 import shutil
 
+import matplotlib as mpl
+# Use "agg" backend automatically if no display is available.
+try:
+    os.environ["DISPLAY"]
+except KeyError:
+    mpl.use("agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn.apionly as sns
