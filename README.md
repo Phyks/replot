@@ -16,54 +16,66 @@ design in the API, or required feature!
     <dd>Matplotlib plots are quite ugly by default, colors are not really
     suited for optimal black and white print, or ease reading for colorblind
     people. This module imports and makes use of
-    [Seaborn](https://github.com/mwaskom/seaborn) for saner default params.</dd>
+    [Seaborn](https://github.com/mwaskom/seaborn) for saner default
+    params.</dd>
 
-    <dt>Support `with` statement</dt>
+    <dt>Support <code>with</code> statement</dt>
     <dd>Ever got tired of having to start any figure with a call to
-    `matplotlib.pyplot.subplots()`? This module abstracts it using `with`
-    statement. New figures are defined by a `with` statement, and are `show`n
-    automatically (or `save`d) upon leaving the `with` context.
+    <code>matplotlib.pyplot.subplots()</code>? This module abstracts it using
+    <code>with</code> statement. New figures are defined by a
+    <code>with</code> statement, and are <code>show</code>n automatically (or
+    <code>save</code>d) upon leaving the <code>with</code> context.
 
     <dt>Plot functions</dt>
-    <dd>Ever got annoyed by the fact that `matplotlib` can only plot point
-    series and not evaluate a function _à la_ Mathematica? This module let
-    you do things like `plot(sin, (-10, 10))` to plot a sine function between
-    -10 and 10, using adaptive sampling.
+    <dd>Ever got annoyed by the fact that <code>matplotlib</code> can only
+    plot point series and not evaluate a function <em>à la</em> Mathematica?
+    This module let you do things like <code>plot(sin, (-10, 10))</code> to
+    plot a sine function between -10 and 10, using adaptive sampling.
 
     <dt>Order of call of methods is no longer important</dt>
-    <dd>When calling a method from `matplotlib`, it is directly applied to the
-    figure, and not deferred to the final render call. Then, if calling
-    `matplotlib.pyplot.legend()` **before** having actually `plot`ted
-    anything, it will fail. This is not the case with this module, as it
-    abstracts on top of `matplotlib` and do the actual render only when the
-    figure is to be `show`n. Even after having called the `show` method, you
-    can still change everything in your figure!</dd>
+    <dd>When calling a method from <code>matplotlib</code>, it is directly
+    applied to the figure, and not deferred to the final render call. Then, if
+    calling <code>matplotlib.pyplot.legend()</code> **before** having actually
+    <code>plot</code>ted anything, it will fail. This is not the case with
+    this module, as it abstracts on top of <code>matplotlib</code> and do the
+    actual render only when the figure is to be <code>show</code>n. Even after
+    having called the <code>show</code> method, you can still change
+    everything in your figure!</dd>
 
-    <dt>Does not interfere with `matplotlib`</dt>
-    <dd>You can still use the default `matplotlib` if you want, as
-    `matplotlib` state and parameters are not directly affected by this
-    module, contrary to what `seaborn` do when you import it for
-    instance.</dd>
+    <dt>Does not interfere with <code>matplotlib</code></dt>
+    <dd>You can still use the default <code>matplotlib</code> if you want, as
+    <code>matplotlib</code> state and parameters are not directly affected by
+    this module, contrary to what <code>seaborn</code> do when you import it
+    for instance.</dd>
 
     <dt>Useful aliases</dt>
-    <dd>You think `loc="top left"` is easier to remember than `loc="upper
-    left"` in a `matplotlib.pyplot.legend()` call? No worry, this module
-    aliases it for you! (same for "bottom" with respect to "lower")</dd>
+    <dd>You think <code>loc="top left"</code> is easier to remember than
+    <code>loc="upper left"</code> in a <code>matplotlib.pyplot.legend()</code>
+    call? No worry, this module aliases it for you! (same for "bottom" with
+    respect to "lower")</dd>
 
     <dt>Automatic legend</dt>
-    <dd>If any of your plots contains a `label` keyword, a legend will be
-    added automatically on your graph (you can still explicitly tell it not to
-    add a legend by setting the `legend` attribute to `False`).</dd>
+    <dd>If any of your plots contains a <code>label</code> keyword, a legend
+    will be added automatically on your graph (you can still explicitly tell
+    it not to add a legend by setting the <code>legend</code> attribute to
+    <code>False</code>).</dd>
 
-    <dt>Use `LaTeX` rendering in `matplotlib`, if available.</dt>
-    <dd>If `replot` finds `LaTeX` installed on your machine, it will overload
-    `matplotlib` settings to use `LaTeX` rendering.</dd>
+    <dt>Use <code>LaTeX</code> rendering in <code>matplotlib</code>, if
+    available.</dt>
+    <dd>If <code>replot</code> finds <code>LaTeX</code> installed on your
+    machine, it will overload <code>matplotlib</code> settings to use
+    <code>LaTeX</code> rendering.</dd>
 
     <dt>Handle subplots more easily</dt>
-    <dd>**TODO**</dd>
+    <dd>Have you ever struggled with <code>matplotlib</em> to define a subplot
+    grid and arrange your plot? <code>replot</code> lets you describe your
+    grid visually using ascii art!</dd>
 
     <dt>"Gridify"</dt>
-    <dd>**TODO**</dd>
+    <dd>You have some plots that you would like to arrange into a grid, to
+    compare them easily, but you do not want to waste time setting up a grid
+    and placing your plots at the correct place? <code>gridify</code> method
+    just does it for you!</dd>
 </dl>
 
 

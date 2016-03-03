@@ -155,7 +155,7 @@ class Figure():
                 "Invalid grid provided. You did not use rectangular areas " +
                 "for each group.")
 
-    def gridify(self, height=None, width=None):
+    def gridify(self, height=None, width=None, ignore_groups=False):
         """
         Apply an automatic grid on the figure, trying to fit best to the \
                 number of plots.
@@ -169,7 +169,22 @@ class Figure():
 
         :param height: An optional ``height`` for the grid.
         :param width: An optional ``height`` for the grid.
+        :param ignore_groups: By default, ``gridify`` will use groups to \
+                organize plots in different subplots. If you want to put \
+                every plot in a different subplot, without dealing with \
+                groups, you can set this to ``True``.
         """
+        if ignore_groups:
+            # If we want to ignore groups, we will start by creating a new
+            # group for every existing plot
+            existing_plots = []
+            for group_ in self.plots:
+                existing_plots.extend(self.plots[group_])
+            self.plots = collections.defaultdict(list,
+                                                 {chr(i): [existing_plots[i]]
+                                                  for i in
+                                                  range(len(existing_plots))})
+
         # Find the optimal layout
         nb_groups = len(self.plots)
         if height is None and width is not None:
