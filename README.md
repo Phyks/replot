@@ -74,8 +74,8 @@ design in the API, or required feature!
     <dt>"Gridify"</dt>
     <dd>You have some plots that you would like to arrange into a grid, to
     compare them easily, but you do not want to waste time setting up a grid
-    and placing your plots at the correct place? <code>gridify</code> method
-    just does it for you!</dd>
+    and placing your plots at the correct place? <code>replot</code> handles
+    it for you out of the box!</dd>
 </dl>
 
 
