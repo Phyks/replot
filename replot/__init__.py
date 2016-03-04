@@ -129,7 +129,9 @@ class Figure():
         figure = self._render()
         figure.show()
 
-    def set_grid(self, grid_description=None, auto=False):
+    def set_grid(self, grid_description=None,
+                 height=None, width=None, ignore_groups=False,
+                 auto=False):
         """
         Apply a grid layout on the figure (subplots). Subplots are based on \
                 defined groups (see ``group`` keyword to \
@@ -138,12 +140,17 @@ class Figure():
         :param grid_description: A list of rows. Each row is a string \
                 containing the groups to display (can be seen as ASCII art). \
                 Can be a single string in case of a single row.
+        :param height: An optional ``height`` for the grid, implies \
+                ``auto=True``.
+        :param width: An optional ``height`` for the grid, implies \
+                ``auto=True``.
+        :param ignore_groups: (optional, implies ``auto=True``) By default, \
+                ``set_grid`` will use groups to organize plots in different \
+                subplots. If you want to put every plot in a different \
+                subplot, regardless of their groups, you can set this \
+                to ``True``.
         :param auto: Whether the grid should be guessed automatically from \
-                groups or not (optional). Can be a boolean or a dict having \
-                the possible ``height`` (int), ``width`` (int) and  \
-                ``ignore_groups`` (boolean) fields to force the height or \
-                width of the resulting grid, or force every plot to go in \
-                a separate subplot, regardless of its group.
+                groups or not (optional).
 
         .. note:: Groups are a single unicode character. If a group does not \
                 contain any plot, the resulting subplot will simply be empty.
@@ -156,11 +163,8 @@ class Figure():
                                                        "DEC"])
         """
         # Handle auto gridifying
-        if auto is not False:
-            if isinstance(auto, dict):
-                self._set_auto_grid(**auto)
-            else:
-                self._set_auto_grid()
+        if auto or height is not None or width is not None or ignore_groups:
+            self._set_auto_grid(height, width, ignore_groups)
             return
 
         # Default parameters
@@ -206,9 +210,9 @@ class Figure():
 
         :param height: An optional ``height`` for the grid.
         :param width: An optional ``height`` for the grid.
-        :param ignore_groups: By default, ``gridify`` will use groups to \
+        :param ignore_groups: By default, ``set_grid`` will use groups to \
                 organize plots in different subplots. If you want to put \
-                every plot in a different subplot, without dealing with \
+                every plot in a different subplot, regardless of their \
                 groups, you can set this to ``True``.
         """
         if ignore_groups:
