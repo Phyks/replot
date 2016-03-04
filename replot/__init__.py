@@ -36,6 +36,7 @@ class Figure():
     """
     def __init__(self,
                  xlabel="", ylabel="", title="",
+                 xrange=None, yrange=None,
                  palette="hls", max_colors=10,
                  legend=None, savepath=None, grid=None):
         """
@@ -44,6 +45,10 @@ class Figure():
         :param xlabel: Label for the X axis (optional).
         :param ylabel: Label for the Z axis (optional).
         :param title: Title of the figure (optional).
+        :param xrange: Range of the X axis (optional), as a tuple \
+                representing the interval.
+        :param yrange: Range of the Y axis (optional), as a tuple \
+                representing the interval.
         :param palette: Color palette to use (optional). Defaults to a safe \
                 palette with compatibility with colorblindness and black and \
                 white printing.
@@ -65,9 +70,10 @@ class Figure():
                 No check for grid validity is being made. You can set it to \
                 ``False`` to disable it completely.
 
-        .. note:: If you use group plotting, ``xlabel``, ``ylabel`` and \
-                ``legend`` will be set uniformly for every subplot. If you \
-                wish to set different properties for every subplots, you \
+        .. note:: If you use group plotting, ``xlabel``, ``ylabel``, \
+                ``legend``, ``xrange``, ``yrange`` and ``zrange``  will be \
+                set uniformly for every subplot. If you wish to set \
+                different properties for every subplots, you \
                 should pass a dict for these properties, keys being the \
                 group symbols and values being the value for each subplot.
         """
@@ -75,6 +81,8 @@ class Figure():
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.title = title
+        self.xrange = xrange
+        self.yrange = yrange
         self.palette = palette
         self.max_colors = max_colors
         self.legend = legend
@@ -404,6 +412,28 @@ class Figure():
                 self._legend(axis, overload_legend=True)
         else:
             self._legend(axis)
+        # Set xrange
+        if isinstance(self.xrange, dict):
+            try:
+                if self.xrange[group_] is not None:
+                    axis.set_xlim(*self.xrange[group_])
+            except KeyError:
+                # No entry for this axis in the dict, pass it
+                pass
+        else:
+            if self.xrange is not None:
+                axis.set_xlim(*self.xrange)
+        # Set yrange
+        if isinstance(self.yrange, dict):
+            try:
+                if self.yrange[group_] is not None:
+                    axis.set_ylim(*self.yrange[group_])
+            except KeyError:
+                # No entry for this axis in the dict, pass it
+                pass
+        else:
+            if self.yrange is not None:
+                axis.set_ylim(*self.yrange)
 
     def _render(self):
         """
