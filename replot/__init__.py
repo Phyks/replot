@@ -62,7 +62,8 @@ class Figure():
                 a description of the grid as a list of subplots. Each subplot \
                 is a tuple of \
                 ``((y_position, x_position), symbol, (rowspan, colspan))``. \
-                No check for grid validity is being made.
+                No check for grid validity is being made. You can set it to \
+                ``False`` to disable it completely.
 
         .. note:: If you use group plotting, ``xlabel``, ``ylabel`` and \
                 ``legend`` will be set uniformly for every subplot. If you \
@@ -120,7 +121,7 @@ class Figure():
         figure = self._render()
         figure.show()
 
-    def apply_grid(self, grid_description):
+    def set_grid(self, grid_description=None, auto=False):
         """
         Apply a grid layout on the figure (subplots). Subplots are based on \
                 defined groups (see ``group`` keyword to \
@@ -128,6 +129,12 @@ class Figure():
 
         :param grid_description: A list of rows. Each row is a string \
                 containing the groups to display (can be seen as ASCII art).
+        :param auto: Whether the grid should be guessed automatically from \
+                groups or not (optional). Can be a boolean or a dict having \
+                the possible ``height`` (int), ``width`` (int) and  \
+                ``ignore_groups`` (boolean) fields to force the height or \
+                width of the resulting grid, or force every plot to go in \
+                a separate subplot, regardless of its group.
 
         .. note:: Groups are a single unicode character. If a group does not \
                 contain any plot, the resulting subplot will simply be empty.
@@ -135,10 +142,26 @@ class Figure():
         .. note:: Note that if you do not include the default group in the \
                 grid description, it will not be shown.
 
-        >>> with replot.Figure() as fig: fig.apply_grid(["AAA",
-                                                         "BBC"
-                                                         "DEC"])
+        >>> with replot.Figure() as fig: fig.set_grid(["AAA",
+                                                       "BBC"
+                                                       "DEC"])
         """
+        # Handle auto gridifying
+        if auto is not False:
+            if isinstance(auto, dict):
+                self._set_auto_grid(**auto)
+            else:
+                self._set_auto_grid()
+            return
+
+        # Default parameters
+        if grid_description is None:
+            grid_description = []
+        elif grid_description is False:
+            # Disable the grid and return
+            self.grid = False
+            return
+
         # Check that grid is not empty
         if len(grid_description) == 0:
             raise exc.InvalidParameterError("Grid cannot be an empty list.")
@@ -148,14 +171,16 @@ class Figure():
                 raise exc.InvalidParameterError(
                     "All rows must have the same number of elements.")
         # Parse the ASCII art grid
-        self.grid = grid_parser.parse_ascii(grid_description)
-        if self.grid is None:
+        parsed_grid = grid_parser.parse_ascii(grid_description)
+        if parsed_grid is None:
             # If grid is not valid, raise an exception
             raise exc.InvalidParameterError(
                 "Invalid grid provided. You did not use rectangular areas " +
                 "for each group.")
+        # Set the grid
+        self.grid = parsed_grid
 
-    def gridify(self, height=None, width=None, ignore_groups=False):
+    def _set_auto_grid(self, height=None, width=None, ignore_groups=False):
         """
         Apply an automatic grid on the figure, trying to fit best to the \
                 number of plots.
@@ -203,7 +228,7 @@ class Figure():
             groups.append(_DEFAULT_GROUP)
         grid_description = ["".join(batch)
                             for batch in tools.batch(groups, width)]
-        self.apply_grid(grid_description)
+        self.set_grid(grid_description)
 
     def plot(self, *args, **kwargs):
         """
@@ -310,27 +335,32 @@ class Figure():
                 a dict mapping the symbols of the groups to matplotlib axes \
                 as second element.
         """
-        if self.grid is None:
-            # If no grid is provided, return a figure and a dict containing
-            # only the default group, occupying the whole figure.
-            figure, axes = plt.subplots()
-            return figure, {_DEFAULT_GROUP: axes}
-        else:
-            # Axes is a dict associating symbols to matplotlib axes
+        if self.grid is False:
+            # If grid is disabled, we plot every group in the same sublot.
             axes = {}
-            figure = plt.figure()
-            # Build all the axes
-            grid_size = (self.grid["height"], self.grid["width"])
-            for subplot in self.grid["grid"]:
-                position, symbol, (rowspan, colspan) = subplot
-                axes[symbol] = plt.subplot2grid(grid_size,
-                                                position,
-                                                colspan=colspan,
-                                                rowspan=rowspan)
-            if _DEFAULT_GROUP not in axes:
-                # Set the default group axe to None if it is not in the grid
-                axes[_DEFAULT_GROUP] = None
+            figure, axe = plt.subplots()
+            for subplot in self.plots:
+                axes[subplot] = axe
             return figure, axes
+        elif self.grid is None:
+            # If no grid is provided, create an auto grid for the figure.
+            self._set_auto_grid()
+
+        # Axes is a dict associating symbols to matplotlib axes
+        axes = {}
+        figure = plt.figure()
+        # Build all the axes
+        grid_size = (self.grid["height"], self.grid["width"])
+        for subplot in self.grid["grid"]:
+            position, symbol, (rowspan, colspan) = subplot
+            axes[symbol] = plt.subplot2grid(grid_size,
+                                            position,
+                                            colspan=colspan,
+                                            rowspan=rowspan)
+        if _DEFAULT_GROUP not in axes:
+            # Set the default group axe to None if it is not in the grid
+            axes[_DEFAULT_GROUP] = None
+        return figure, axes
 
     def _set_axes_properties(self, axe, group_):
         # Set xlabel
