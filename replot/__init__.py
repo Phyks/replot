@@ -128,7 +128,8 @@ class Figure():
                 ``replot.Figure.plot``).
 
         :param grid_description: A list of rows. Each row is a string \
-                containing the groups to display (can be seen as ASCII art).
+                containing the groups to display (can be seen as ASCII art). \
+                Can be a single string in case of a single row.
         :param auto: Whether the grid should be guessed automatically from \
                 groups or not (optional). Can be a boolean or a dict having \
                 the possible ``height`` (int), ``width`` (int) and  \
@@ -161,6 +162,9 @@ class Figure():
             # Disable the grid and return
             self.grid = False
             return
+        elif isinstance(grid_description, str):
+            # If a single string is provided, enclose it in a list.
+            grid_description = [grid_description]
 
         # Check that grid is not empty
         if len(grid_description) == 0:
