@@ -7,6 +7,7 @@ import math
 import os
 import shutil
 
+import cycler
 import matplotlib as mpl
 # Use "agg" backend automatically if no display is available.
 try:
@@ -15,7 +16,6 @@ except KeyError:
     mpl.use("agg")
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn.apionly as sns
 
 from replot import adaptive_sampling
 from replot import exceptions as exc
@@ -25,8 +25,22 @@ from replot import tools
 
 __VERSION__ = "0.0.1"
 
-# Constants
+#############
+# CONSTANTS #
+#############
 _DEFAULT_GROUP = "_"
+# Default palette is husl palette with length 10 color cycle
+_DEFAULT_PALETTE = [
+    (0.9677975592919913, 0.44127456009157356, 0.5358103155058701),
+    (0.8616090647292522, 0.536495730113334, 0.19548899031476086),
+    (0.6804189127793346, 0.6151497514677574, 0.19405452111445337),
+    (0.46810256823426105, 0.6699492535792404, 0.1928958739904499),
+    (0.20125317221201128, 0.6907920815379025, 0.47966761189275336),
+    (0.21044753832183283, 0.6773105080456748, 0.6433941168468681),
+    (0.2197995660828324, 0.6625157876850336, 0.7732093159317209),
+    (0.433280341176423, 0.6065273407962815, 0.9585467098271748),
+    (0.8004936186423958, 0.47703363533737203, 0.9579547196007522),
+    (0.962272393509669, 0.3976451968965351, 0.8008274363432775)]
 
 
 class Figure():
@@ -37,8 +51,9 @@ class Figure():
     def __init__(self,
                  xlabel="", ylabel="", title="",
                  xrange=None, yrange=None,
-                 palette="hls", max_colors=10,
-                 legend=None, savepath=None, grid=None):
+                 palette=_DEFAULT_PALETTE,
+                 legend=None, savepath=None, grid=None,
+                 custom_mpl_rc=None):
         """
         Build a :class:`Figure` object.
 
@@ -52,9 +67,8 @@ class Figure():
         :param palette: Color palette to use (optional). Defaults to a safe \
                 palette with compatibility with colorblindness and black and \
                 white printing.
-        :type palette: Either a palette name (``str``) or a built palette.
-        :param max_colors: Number of colors to use in the palette (optional). \
-                Defaults to 10.
+        :type palette: Either a list of colors (as RGB tuples) or a \
+                :mod:`seaborn` ``color_palette`` object.
         :param legend: Whether to use a legend or not (optional). Defaults to \
                 no legend, except if labels are found on provided plots. \
                 ``False`` to disable completely. ``None`` for default \
@@ -69,6 +83,8 @@ class Figure():
                 ``((y_position, x_position), symbol, (rowspan, colspan))``. \
                 No check for grid validity is being made. You can set it to \
                 ``False`` to disable it completely.
+        :param custom_mpl_rc: An optional dict to overload some \
+                :mod:`matplotlib` rc params.
 
         .. note:: If you use group plotting, ``xlabel``, ``ylabel``, \
                 ``legend``, ``xrange``, ``yrange`` and ``zrange``  will be \
@@ -84,11 +100,11 @@ class Figure():
         self.xrange = xrange
         self.yrange = yrange
         self.palette = palette
-        self.max_colors = max_colors
         self.legend = legend
         self.plots = collections.defaultdict(list)  # keys are groups
         self.grid = grid
         self.savepath = savepath
+        self.custom_mpl_rc = None
 
     def __enter__(self):
         return self
@@ -439,6 +455,12 @@ class Figure():
             if self.yrange is not None:
                 axis.set_ylim(*self.yrange)
 
+    def _build_cycler_palette(self):
+        """
+        TODO
+        """
+        return cycler.cycler("color", self.palette)
+
     def _render(self):
         """
         Actually render the figure.
@@ -447,37 +469,31 @@ class Figure():
         """
         figure = None
         # Use custom matplotlib context
-        with mpl_custom_rc_context():
-            # Tweak matplotlib to use seaborn
-            sns.set()
-            # Plot using specified color palette
-            with sns.color_palette(palette=self.palette,
-                                   n_colors=self.max_colors):
-                # Create figure
-                figure, axes = self._grid()
-                # Add plots
-                for group_ in self.plots:
-                    # Get the axis corresponding to current group
-                    try:
-                        axis = axes[group_]
-                    except KeyError:
-                        # If not found, plot in the default group
-                        axis = axes[_DEFAULT_GROUP]
-                    # Skip this plot if the axis is None
-                    if axis is None:
-                        continue
-                    # Plot
-                    for plot_ in self.plots[group_]:
-                        tmp_plots = axis.plot(*(plot_[0]), **(plot_[1]))
-                        # Do not clip line at the axes boundaries to prevent
-                        # extremas from being cropped.
-                        for tmp_plot in tmp_plots:
-                            tmp_plot.set_clip_on(False)
-                    # Set ax properties
-                    self._set_axes_properties(axis, group_)
-            # Do not forget to restore matplotlib state, in order not to
-            # interfere with it.
-            sns.reset_orig()
+        palette = self._build_cycler_palette()
+        with mpl_custom_rc_context(palette=palette,
+                                   rc=self.custom_mpl_rc):
+            # Create figure
+            figure, axes = self._grid()
+            # Add plots
+            for group_ in self.plots:
+                # Get the axis corresponding to current group
+                try:
+                    axis = axes[group_]
+                except KeyError:
+                    # If not found, plot in the default group
+                    axis = axes[_DEFAULT_GROUP]
+                # Skip this plot if the axis is None
+                if axis is None:
+                    continue
+                # Plot
+                for plot_ in self.plots[group_]:
+                    tmp_plots = axis.plot(*(plot_[0]), **(plot_[1]))
+                    # Do not clip line at the axes boundaries to prevent
+                    # extremas from being cropped.
+                    for tmp_plot in tmp_plots:
+                        tmp_plot.set_clip_on(False)
+                # Set ax properties
+                self._set_axes_properties(axis, group_)
         return figure
 
 
@@ -494,7 +510,7 @@ def plot(data, **kwargs):
                     ylabel="some y label",
                     title="A title for the figure",
                     legend="best",
-                    palette=replot.sns.color_palette("husl", 2))
+                    palette=seaborn.color_palette("husl", 2))
     """
     # Init new figure
     figure = Figure(**kwargs)
@@ -523,11 +539,106 @@ def plot(data, **kwargs):
     figure.show()
 
 
-def mpl_custom_rc_context():
+def _mpl_custom_rc_scaling():
+    """
+    Scale the elements of the figure to get a better rendering.
+
+    Settings borrowed from
+    [Seaborn](https://github.com/mwaskom/seaborn/blob/master/seaborn/rcmod.py#L344).
+
+    :returns: a :mod:`matplotlib` ``rcParams``-like dict.
+    """
+    rc_params = {
+        "figure.figsize": np.array([8, 5.5]),
+        # Set misc font sizes
+        "font.size": 12,
+        "axes.labelsize": 11,
+        "axes.titlesize": 12,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+        "legend.fontsize": 10,
+        # Set misc linewidth
+        "grid.linewidth": 1,
+        "lines.linewidth": 1.75,
+        "patch.linewidth": .3,
+        "lines.markersize": 7,
+        "lines.markeredgewidth": 1.75,
+        # Disable ticks
+        "xtick.major.width": 0,
+        "ytick.major.width": 0,
+        "xtick.minor.width": 0,
+        "ytick.minor.width": 0,
+        # Set ticks padding
+        "xtick.major.pad": 7,
+        "ytick.major.pad": 7,
+    }
+    return rc_params
+
+
+def _mpl_custom_rc_axes_style():
+    """
+    Set the style of the plot and the axes. Things like set a grid etc.
+
+    Settings borrowed from
+    [Seaborn](https://github.com/mwaskom/seaborn/blob/master/seaborn/rcmod.py#L344).
+
+    :returns: a :mod:`matplotlib` ``rcParams``-like dict.
+    """
+    # Use dark gray instead of black for better readability on screen
+    dark_gray = ".15"
+    rc_params = {
+        # Colors
+        "figure.facecolor": "white",
+        "text.color": dark_gray,
+        # Legend
+        "legend.frameon": False,  # No frame around legend
+        "legend.numpoints": 1,
+        "legend.scatterpoints": 1,
+        # Ticks
+        "xtick.direction": "out",
+        "ytick.direction": "out",
+        "xtick.color": dark_gray,
+        "ytick.color": dark_gray,
+        "lines.solid_capstyle": "round",
+        # Axes
+        "axes.axisbelow": True,
+        "axes.linewidth": 0,
+        "axes.labelcolor": dark_gray,
+        "axes.grid": True,
+        "axes.facecolor": "EAEAF2",
+        "axes.edgecolor": "white",
+        # Grid
+        "grid.linestyle": "-",
+        "grid.color": "white"
+    }
+    return rc_params
+
+
+def _mpl_custom_rc_palette(palette):
+    """
+    Set the palette used on the plots.
+
+    Settings borrowed from
+    [Seaborn](https://github.com/mwaskom/seaborn/blob/master/seaborn/rcmod.py#L344).
+
+    :param palette: The palette to use, as a :mod:`cycler` ``cycler`` object.
+    :returns: a :mod:`matplotlib` ``rcParams``-like dict.
+    """
+    rc_params = {
+        "image.cmap": "Greys",
+        "axes.prop_cycle": palette,
+        "patch.facecolor": [v["color"] for v in palette][0]
+    }
+    return rc_params
+
+
+def mpl_custom_rc_context(palette, rc=None):
     """
     Overload ``matplotlib.rcParams`` to enable advanced features if \
             available. In particular, use LaTeX if available.
 
+    :param palette: The palette to use, as a :mod:`cycler` ``cycler`` object.
+    :param rc: An optional dict to overload some :mod:`matplotlib` rc params.
     :returns: A ``matplotlib.rc_context`` object to use in a ``with`` \
             statement.
     """
@@ -539,6 +650,20 @@ def mpl_custom_rc_context():
         # LateX dependencies are all available
         custom_rc["text.usetex"] = True
         custom_rc["text.latex.unicode"] = True
+    # Use LaTeX default font family
+    # See https://stackoverflow.com/questions/17958485/matplotlib-not-using-latex-font-while-text-usetex-true
+    custom_rc["font.family"] = "serif"
+    custom_rc["font.serif"] = "cm"
+    # Scale everything
+    custom_rc.update(_mpl_custom_rc_scaling())
+    # Set axes style
+    custom_rc.update(_mpl_custom_rc_axes_style())
+    # Set palette
+    custom_rc.update(_mpl_custom_rc_palette(palette))
+    # Overload if necessary
+    if rc is not None:
+        custom_rc.update(rc)
+    # Return a context object
     return plt.rc_context(rc=custom_rc)
 
 
