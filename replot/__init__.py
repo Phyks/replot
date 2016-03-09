@@ -688,6 +688,12 @@ def _handle_custom_plot_arguments(kwargs):
                 "'%s' is a reserved group name." % (_DEFAULT_GROUP,))
         custom_kwargs["group"] = kwargs["group"]
         del kwargs["group"]
+    # Handle "line" argument
+    if "line" in kwargs:
+        if not kwargs["line"]:
+            kwargs["linestyle"] = "None"
+            kwargs["marker"] = "x"
+        del kwargs["line"]
     return (kwargs, custom_kwargs)
 
 
