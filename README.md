@@ -15,9 +15,7 @@ design in the API, or required feature!
     <dt>Saner default plots</dt>
     <dd>Matplotlib plots are quite ugly by default, colors are not really
     suited for optimal black and white print, or ease reading for colorblind
-    people. This module imports and makes use of
-    [Seaborn](https://github.com/mwaskom/seaborn) for saner default
-    params.</dd>
+    people. This module defines a clean default colorscheme to solve it.</dd>
 
     <dt>Support <code>with</code> statement</dt>
     <dd>Ever got tired of having to start any figure with a call to
@@ -35,12 +33,12 @@ design in the API, or required feature!
     <dt>Order of call of methods is no longer important</dt>
     <dd>When calling a method from <code>matplotlib</code>, it is directly
     applied to the figure, and not deferred to the final render call. Then, if
-    calling <code>matplotlib.pyplot.legend()</code> **before** having actually
-    <code>plot</code>ted anything, it will fail. This is not the case with
-    this module, as it abstracts on top of <code>matplotlib</code> and do the
-    actual render only when the figure is to be <code>show</code>n. Even after
-    having called the <code>show</code> method, you can still change
-    everything in your figure!</dd>
+    calling <code>matplotlib.pyplot.legend()</code> <strong>before</strong>
+    having actually <code>plot</code>ted anything, it will fail. This is not
+    the case with this module, as it abstracts on top of
+    <code>matplotlib</code> and do the actual render only when the figure is
+    to be <code>show</code>n. Even after having called the <code>show</code>
+    method, you can still change everything in your figure!</dd>
 
     <dt>Does not interfere with <code>matplotlib</code></dt>
     <dd>You can still use the default <code>matplotlib</code> if you want, as
