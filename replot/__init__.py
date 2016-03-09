@@ -329,6 +329,9 @@ class Figure():
                     pass
             plot_ = (args, kwargs)
 
+        # Keep track of the custom kwargs
+        plot_ += (custom_kwargs,)
+
         # Add the plot to the correct group
         if "group" in custom_kwargs:
             self.plots[custom_kwargs["group"]].append(plot_)
@@ -339,6 +342,28 @@ class Figure():
         # (only do it if legend is not explicitly suppressed)
         if "label" in kwargs and self.legend is None:
             self.legend = True
+
+    def logplot(self, *args, **kwargs):
+        """
+        Plot something on the :class:`Figure` object, in log scale.
+
+        .. note:: See :func:`replot.Figure.plot` for the full documentation.
+
+        >>> with replot.figure() as fig: fig.logplot(np.log, (-1, 1))
+        """
+        kwargs["logscale"] = "log"
+        self.plot(*args, **kwargs)
+
+    def loglogplot(self, *args, **kwargs):
+        """
+        Plot something on the :class:`Figure` object, in log-log scale.
+
+        .. note:: See :func:`replot.Figure.plot` for the full documentation.
+
+        >>> with replot.figure() as fig: fig.logplot(np.log, (-1, 1))
+        """
+        kwargs["logscale"] = "loglog"
+        self.plot(*args, **kwargs)
 
     def _legend(self, axis, overload_legend=None):
         """
@@ -502,6 +527,13 @@ class Figure():
                 # Plot
                 for plot_ in self.plots[group_]:
                     tmp_plots = axis.plot(*(plot_[0]), **(plot_[1]))
+                    # Handle custom kwargs at plotting time
+                    if "logscale" in plot_[2]:
+                        if plot_[2]["logscale"] == "log":
+                            axis.set_xscale("log")
+                        elif plot_[2]["logscale"] == "loglog":
+                            axis.set_xscale("log")
+                            axis.set_yscale("log")
                     # Do not clip line at the axes boundaries to prevent
                     # extremas from being cropped.
                     for tmp_plot in tmp_plots:
@@ -704,10 +736,14 @@ def _handle_custom_plot_arguments(kwargs):
         del kwargs["group"]
     # Handle "line" argument
     if "line" in kwargs:
-        if not kwargs["line"]:
+        if not kwargs["line"]:  # If should not draw lines, set kwargs for it
             kwargs["linestyle"] = "None"
             kwargs["marker"] = "x"
         del kwargs["line"]
+    # Handle "logscale" argument
+    if "logscale" in kwargs:
+        custom_kwargs["logscale"] = kwargs["logscale"]
+        del kwargs["logscale"]
     return (kwargs, custom_kwargs)
 
 

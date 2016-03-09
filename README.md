@@ -74,6 +74,11 @@ design in the API, or required feature!
     compare them easily, but you do not want to waste time setting up a grid
     and placing your plots at the correct place? <code>replot</code> handles
     it for you out of the box!</dd>
+
+    <dt>Easy plotting in log scale</dt>
+    <dd><code>replot</code> defines <code>logplot</code> and
+    <code>loglogplot</code> shortcuts functions to plot in <em>log</em> scale
+    or <em>loglog</em> scale.</dd>
 </dl>
 
 
