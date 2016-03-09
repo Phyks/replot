@@ -110,6 +110,9 @@ class Figure():
         self.grid = grid
         self.savepath = savepath
         self.custom_mpl_rc = None
+        # Working attributes
+        self.figure = None
+        self.axes = None
 
     def __enter__(self):
         return self
@@ -443,7 +446,10 @@ class Figure():
         if _DEFAULT_GROUP not in axes:
             # Set the default group axis to None if it is not in the grid
             axes[_DEFAULT_GROUP] = None
-        return figure, axes
+
+        # Set attributes
+        self.figure = figure
+        self.axes = axes
 
     def _set_axes_properties(self, axis, group_):
         # Set xlabel
@@ -524,19 +530,19 @@ class Figure():
 
         :returns: A :mod:`matplotlib` figure.
         """
-        figure = None
         # Use custom matplotlib context
         with mpl_custom_rc_context(rc=self.custom_mpl_rc):
-            # Create figure
-            figure, axes = self._grid()
+            if self.figure is None or self.axes is None:
+                # Create figure if necessary
+                self._grid()
             # Add plots
             for group_ in self.plots:
                 # Get the axis corresponding to current group
                 try:
-                    axis = axes[group_]
+                    axis = self.axes[group_]
                 except KeyError:
                     # If not found, plot in the default group
-                    axis = axes[_DEFAULT_GROUP]
+                    axis = self.axes[_DEFAULT_GROUP]
                 # Skip this plot if the axis is None
                 if axis is None:
                     continue
@@ -556,7 +562,7 @@ class Figure():
                         tmp_plot.set_clip_on(False)
                 # Set ax properties
                 self._set_axes_properties(axis, group_)
-        return figure
+        return self.figure
 
 
 def plot(data, **kwargs):
