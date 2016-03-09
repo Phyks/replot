@@ -16,6 +16,7 @@ except KeyError:
     mpl.use("agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import palettable
 
 from replot import adaptive_sampling
 from replot import exceptions as exc
@@ -29,18 +30,20 @@ __VERSION__ = "0.0.1"
 # CONSTANTS #
 #############
 _DEFAULT_GROUP = "_"
+
+
 # Default palette is husl palette with length 10 color cycle
-_DEFAULT_PALETTE = [
-    (0.9677975592919913, 0.44127456009157356, 0.5358103155058701),
-    (0.8616090647292522, 0.536495730113334, 0.19548899031476086),
-    (0.6804189127793346, 0.6151497514677574, 0.19405452111445337),
-    (0.46810256823426105, 0.6699492535792404, 0.1928958739904499),
-    (0.20125317221201128, 0.6907920815379025, 0.47966761189275336),
-    (0.21044753832183283, 0.6773105080456748, 0.6433941168468681),
-    (0.2197995660828324, 0.6625157876850336, 0.7732093159317209),
-    (0.433280341176423, 0.6065273407962815, 0.9585467098271748),
-    (0.8004936186423958, 0.47703363533737203, 0.9579547196007522),
-    (0.962272393509669, 0.3976451968965351, 0.8008274363432775)]
+def _default_palette(n):
+    """
+    Default palette is a CubeHelix perceptual rainbow palette with length the
+    number of plots.
+
+    :param n: The number of colors in the palette.
+    :returns: The palette as a list of colors (as RGB tuples).
+    """
+    return palettable.cubehelix.Cubehelix.make(
+        start_hue=240., end_hue=-300., min_sat=1., max_sat=2.5,
+        min_light=0.3, max_light=0.8, gamma=.9, n=n).mpl_colors
 
 
 class Figure():
@@ -51,7 +54,7 @@ class Figure():
     def __init__(self,
                  xlabel="", ylabel="", title="",
                  xrange=None, yrange=None,
-                 palette=_DEFAULT_PALETTE,
+                 palette=_default_palette,
                  legend=None, savepath=None, grid=None,
                  custom_mpl_rc=None):
         """
@@ -67,8 +70,10 @@ class Figure():
         :param palette: Color palette to use (optional). Defaults to a safe \
                 palette with compatibility with colorblindness and black and \
                 white printing.
-        :type palette: Either a list of colors (as RGB tuples) or a \
-                :mod:`seaborn` ``color_palette`` object.
+        :type palette: Either a list of colors (as RGB tuples) or a function \
+                to call with number of plots as parameter and which returns a \
+                list of colors (as RGB tuples). You can also pass a Seaborn \
+                palette directly, or use a Palettable Palette.mpl_colors.
         :param legend: Whether to use a legend or not (optional). Defaults to \
                 no legend, except if labels are found on provided plots. \
                 ``False`` to disable completely. ``None`` for default \
@@ -410,6 +415,10 @@ class Figure():
             # If grid is disabled, we plot every group in the same sublot.
             axes = {}
             figure, axis = plt.subplots()
+            # Set the palette for the subplot
+            axis.set_prop_cycle(
+                self._build_cycler_palette(sum([len(i) for i in self.plots])))
+            # Set the axis for every subplot
             for subplot in self.plots:
                 axes[subplot] = axis
             return figure, axes
@@ -428,6 +437,9 @@ class Figure():
                                             position,
                                             colspan=colspan,
                                             rowspan=rowspan)
+            # Set the palette for the subplot
+            axes[symbol].set_prop_cycle(
+                self._build_cycler_palette(len(self.plots[symbol])))
         if _DEFAULT_GROUP not in axes:
             # Set the default group axis to None if it is not in the grid
             axes[_DEFAULT_GROUP] = None
@@ -494,11 +506,17 @@ class Figure():
             if self.yrange is not None:
                 axis.set_ylim(*self.yrange)
 
-    def _build_cycler_palette(self):
+    def _build_cycler_palette(self, n):
         """
-        TODO
+        Build a cycler palette for the selected subplot.
+
+        :param n: number of colors in the palette.
+        :returns: a cycler object for the palette.
         """
-        return cycler.cycler("color", self.palette)
+        if hasattr(self.palette, "__call__"):
+            return cycler.cycler("color", self.palette(n))
+        else:
+            return cycler.cycler("color", self.palette)
 
     def _render(self):
         """
@@ -508,9 +526,7 @@ class Figure():
         """
         figure = None
         # Use custom matplotlib context
-        palette = self._build_cycler_palette()
-        with mpl_custom_rc_context(palette=palette,
-                                   rc=self.custom_mpl_rc):
+        with mpl_custom_rc_context(rc=self.custom_mpl_rc):
             # Create figure
             figure, axes = self._grid()
             # Add plots
@@ -655,35 +671,18 @@ def _mpl_custom_rc_axes_style():
         "axes.edgecolor": "white",
         # Grid
         "grid.linestyle": "-",
-        "grid.color": "white"
+        "grid.color": "white",
+        # Image
+        "image.cmap": "Greys"
     }
     return rc_params
 
 
-def _mpl_custom_rc_palette(palette):
-    """
-    Set the palette used on the plots.
-
-    Settings borrowed from
-    [Seaborn](https://github.com/mwaskom/seaborn/blob/master/seaborn/rcmod.py#L344).
-
-    :param palette: The palette to use, as a :mod:`cycler` ``cycler`` object.
-    :returns: a :mod:`matplotlib` ``rcParams``-like dict.
-    """
-    rc_params = {
-        "image.cmap": "Greys",
-        "axes.prop_cycle": palette,
-        "patch.facecolor": [v["color"] for v in palette][0]
-    }
-    return rc_params
-
-
-def mpl_custom_rc_context(palette, rc=None):
+def mpl_custom_rc_context(rc=None):
     """
     Overload ``matplotlib.rcParams`` to enable advanced features if \
             available. In particular, use LaTeX if available.
 
-    :param palette: The palette to use, as a :mod:`cycler` ``cycler`` object.
     :param rc: An optional dict to overload some :mod:`matplotlib` rc params.
     :returns: A ``matplotlib.rc_context`` object to use in a ``with`` \
             statement.
@@ -704,8 +703,6 @@ def mpl_custom_rc_context(palette, rc=None):
     custom_rc.update(_mpl_custom_rc_scaling())
     # Set axes style
     custom_rc.update(_mpl_custom_rc_axes_style())
-    # Set palette
-    custom_rc.update(_mpl_custom_rc_palette(palette))
     # Overload if necessary
     if rc is not None:
         custom_rc.update(rc)

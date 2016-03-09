@@ -105,3 +105,6 @@ reuse. For more details, see `LICENSE.txt` file.
   the original idea.
 * [This code](http://central.scipy.org/item/53/1/adaptive-sampling-of-1d-functions)
   from scipy central for a base code for adaptive sampling.
+* [Palettable](https://jiffyclub.github.io/palettable/) for palettes.
+* [Cubehelix](http://www.ifweassume.com/2013/05/cubehelix-or-how-i-learned-to-love.html)
+  colorscheme for nice black and white printing and desaturation compatibility.
