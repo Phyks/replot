@@ -288,6 +288,10 @@ class Figure():
                     :mod:`replot` to use subplots. Note that ``_`` is a \
                     reserved group name which cannot be used.
 
+        .. note:: Note that this API call considers list of tuples as \
+                list of (x, y) coordinates to plot, contrary to standard \
+                matplotlib API which considers it is two different plots.
+
         >>> with replot.figure() as fig: fig.plot(np.sin, (-1, 1))
         >>> with replot.figure() as fig: fig.plot(np.sin, [-1, -0.9, …, 1])
         >>> with replot.figure() as fig: fig.plot([1, 2, 3], [4, 5, 6])
@@ -313,6 +317,16 @@ class Figure():
         else:
             # Else, it is a point series, and we just have to store it for
             # later plotting.
+            if hasattr(args[0], "__iter__"):
+                try:
+                    # If we pass it a list of tuples, consider it as a list of
+                    # (x, y) coordinates contrary to the standard matplotlib
+                    # behavior
+                    x_list, y_list = zip(*args[0])
+                    args = (list(x_list),
+                            list(y_list)) + args[1:]
+                except (TypeError, StopIteration, AssertionError):
+                    pass
             plot_ = (args, kwargs)
 
         # Add the plot to the correct group
