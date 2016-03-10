@@ -143,14 +143,14 @@ class Figure():
         if len(args) == 0 and self.savepath is not None:
             args = (self.savepath,)
 
-        figure = self._render()
+        figure = self.render()
         figure.savefig(*args, **kwargs)
 
     def show(self):
         """
         Render and show the :class:`Figure` object.
         """
-        figure = self._render()
+        figure = self.render()
         figure.show()
 
     def set_grid(self, grid_description=None,
@@ -295,6 +295,13 @@ class Figure():
                     keyword will not affect the render unless you state \
                     :mod:`replot` to use subplots. Note that ``_`` is a \
                     reserved group name which cannot be used.
+            - ``line`` which can be set to ``True``/``False`` to plot \
+                    broken lines or discrete data series.
+            - ``logscale`` which can be either ``log`` or ``loglog`` to use \
+                    such scales.
+            - ``orthonormal`` (boolean) to force axis to be orthonormal.
+            - ``xlim`` and ``ylim`` which are tuples of intervals on the \
+                    x and y axis.
 
         .. note:: Note that this API call considers list of tuples as \
                 list of (x, y) coordinates to plot, contrary to standard \
@@ -524,7 +531,7 @@ class Figure():
         else:
             return cycler.cycler("color", self.palette)
 
-    def _render(self):
+    def render(self):
         """
         Actually render the figure.
 
@@ -556,6 +563,12 @@ class Figure():
                         elif plot_[2]["logscale"] == "loglog":
                             axis.set_xscale("log")
                             axis.set_yscale("log")
+                    if "orthonormal" in plot_[2] and plot_[2]["orthonormal"]:
+                        axis.set_aspect("equal")
+                    if "xlim" in plot_[2]:
+                        axis.set_xlim(*plot_[2]["xlim"])
+                    if "ylim" in plot_[2]:
+                        axis.set_ylim(*plot_[2]["ylim"])
                     # Do not clip line at the axes boundaries to prevent
                     # extremas from being cropped.
                     for tmp_plot in tmp_plots:
@@ -747,6 +760,18 @@ def _handle_custom_plot_arguments(kwargs):
     if "logscale" in kwargs:
         custom_kwargs["logscale"] = kwargs["logscale"]
         del kwargs["logscale"]
+    # Handle "orthonormal" argument
+    if "orthonormal" in kwargs:
+        custom_kwargs["orthonormal"] = kwargs["orthonormal"]
+        del kwargs["orthonormal"]
+    # Handle "xlim" argument
+    if "xlim" in kwargs:
+        custom_kwargs["xlim"] = kwargs["xlim"]
+        del kwargs["xlim"]
+    # Handle "ylim" argument
+    if "ylim" in kwargs:
+        custom_kwargs["ylim"] = kwargs["ylim"]
+        del kwargs["ylim"]
     return (kwargs, custom_kwargs)
 
 
