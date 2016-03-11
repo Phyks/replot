@@ -302,6 +302,10 @@ class Figure():
             - ``orthonormal`` (boolean) to force axis to be orthonormal.
             - ``xlim`` and ``ylim`` which are tuples of intervals on the \
                     x and y axis.
+            - ``invert`` (boolean) invert X and Y axis on the plot. Invert \
+                    the axes labels as well.
+            - ``rotate`` (angle in degrees) rotate the plot by the angle in \
+                    degrees. Leave the labels untouched.
 
         .. note:: Note that this API call considers list of tuples as \
                 list of (x, y) coordinates to plot, contrary to standard \
@@ -346,6 +350,29 @@ class Figure():
 
         # Keep track of the custom kwargs
         plot_ += (custom_kwargs,)
+
+        # Handle inversion
+        if "invert" in custom_kwargs and custom_kwargs["invert"]:
+            # Invert X and Y data
+            plot_ = (
+                (plot_[0][1], plot_[0][0]) + plot_[0][2:],
+                plot_[1], plot_[2])
+        # Handle rotation
+        if "rotate" in custom_kwargs:
+            # Rotate X, Y data
+            # TODO: Not clean
+            new_X_list = []
+            new_Y_list = []
+            for x, y in zip(plot_[0][0], plot_[0][1]):
+                new_X_list.append(
+                    np.cos(custom_kwargs["rotate"]) * x +
+                    np.sin(custom_kwargs["rotate"]) * y)
+                new_Y_list.append(
+                    -np.sin(custom_kwargs["rotate"]) * x +
+                    np.cos(custom_kwargs["rotate"]) * y)
+            plot_ = (
+                (new_X_list, new_Y_list) + plot_[0][2:],
+                plot_[1], plot_[2])
 
         # Add the plot to the correct group
         if "group" in custom_kwargs:
@@ -459,24 +486,45 @@ class Figure():
         self.axes = axes
 
     def _set_axes_properties(self, axis, group_):
+        is_inverted_axis = len(
+            [i
+             for i in self.plots[group_]
+             if "invert" in i[2] and i[2]["invert"]]
+        ) > 0
         # Set xlabel
         if isinstance(self.xlabel, dict):
             try:
-                axis.set_xlabel(self.xlabel[group_])
+                if is_inverted_axis:
+                    # Handle axis inversion
+                    axis.set_ylabel(self.xlabel[group_])
+                else:
+                    axis.set_xlabel(self.xlabel[group_])
             except KeyError:
                 # No entry for this axis in the dict, pass it
                 pass
         else:
-            axis.set_xlabel(self.xlabel)
+            if is_inverted_axis:
+                # Handle axis inversion
+                axis.set_ylabel(self.xlabel)
+            else:
+                axis.set_xlabel(self.xlabel)
         # Set ylabel
         if isinstance(self.ylabel, dict):
             try:
-                axis.set_ylabel(self.ylabel[group_])
+                if is_inverted_axis:
+                    # Handle axis inversion
+                    axis.set_xlabel(self.ylabel[group_])
+                else:
+                    axis.set_ylabel(self.ylabel[group_])
             except KeyError:
                 # No entry for this axis in the dict, pass it
                 pass
         else:
-            axis.set_ylabel(self.ylabel)
+            if is_inverted_axis:
+                # Handle axis inversion
+                axis.set_xlabel(self.ylabel)
+            else:
+                axis.set_ylabel(self.ylabel)
         # Set title
         if isinstance(self.title, dict):
             try:
@@ -772,6 +820,15 @@ def _handle_custom_plot_arguments(kwargs):
     if "ylim" in kwargs:
         custom_kwargs["ylim"] = kwargs["ylim"]
         del kwargs["ylim"]
+    # Handle "invert" argument
+    if "invert" in kwargs:
+        custom_kwargs["invert"] = kwargs["invert"]
+        del kwargs["invert"]
+    # Handle "rotate" argument
+    if "rotate" in kwargs:
+        # Convert angle to radians
+        custom_kwargs["rotate"] = kwargs["rotate"] * np.pi / 180
+        del kwargs["rotate"]
     return (kwargs, custom_kwargs)
 
 
