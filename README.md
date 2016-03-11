@@ -80,10 +80,11 @@ design in the API, or required feature!
     and placing your plots at the correct place? <code>replot</code> handles
     it for you out of the box!</dd>
 
-    <dt>Easy plotting in log scale</dt>
+    <dt>Easy plotting in log scale, orthonormal axis etc</dt>
     <dd><code>replot</code> defines <code>logplot</code> and
     <code>loglogplot</code> shortcuts functions to plot in <em>log</em> scale
-    or <em>loglog</em> scale.</dd>
+    or <em>loglog</em> scale. Use `orthonormal=True` on a `plot` command to
+    plot using orthonormal axes.</dd>
 </dl>
 
 
