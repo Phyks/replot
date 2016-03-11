@@ -1,9 +1,14 @@
 Replot
 ======
 
-
 This repo is an attempt for a better API to plot graphs with
 [Matplotlib](http://matplotlib.org/) in Python.
+
+
+`Matplotlib` is a wonderful Python modules to plot data series, functions and
+so on. However, I think the API is quite verbose. This is an attempt at
+providing a better frontend API on top of `matplotlib` for easy and fast
+plotting, especially at prototyping time.
 
 ## Features
 
@@ -98,8 +103,7 @@ reuse. For more details, see `LICENSE.txt` file.
 
 ## Thanks
 
-* [Matplotlib](http://matplotlib.org/) for their really good backend (but
-  not for their terrible API)
+* [Matplotlib](http://matplotlib.org/) for their really good backend.
 * [Seaborn](https://github.com/mwaskom/seaborn) and
   [prettyplotlib](http://blog.olgabotvinnik.com/prettyplotlib/) which gave me
   the original idea.
