@@ -15,3 +15,10 @@ class InvalidParameterError(BaseException):
     Exception raised when an invalid parameter is provided.
     """
     pass
+
+
+class InvalidFigure(BaseException):
+    """
+    Exception raised when a figure is invalid and cannot be shown.
+    """
+    pass
