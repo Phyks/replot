@@ -6,7 +6,7 @@ except ImportError:
     print('[replot] setuptools not found.')
     raise
 
-with open('replot/__init__.py') as fh:
+with open('replot/constants.py') as fh:
     for line in fh:
         line = line.strip()
         if line.startswith('__VERSION__'):

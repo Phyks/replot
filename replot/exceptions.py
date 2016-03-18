@@ -1,5 +1,5 @@
 """
-TODO
+Exception classes used in :mod:`replot`.
 """
 
 
