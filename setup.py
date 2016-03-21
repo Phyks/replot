@@ -36,6 +36,6 @@ setup(
     author_email='phyks@phyks.me',
     license='MIT License',
     description='A (sane) Python plotting module, abstracting on top of Matplotlib.',
-    packages=['replot'],
+    packages=['replot', 'replot.grid', 'replot.helpers'],
     install_requires=install_requires
 )
