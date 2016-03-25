@@ -91,8 +91,6 @@ class Figure():
         self.savepath = savepath
         self.custom_mpl_rc = custom_mpl_rc
         # Working attributes
-        self.figure = None
-        self.axes = None
         self.animation = {"type": False,
                           "args": (), "kwargs": {},
                           "persist": []}
@@ -126,9 +124,9 @@ class Figure():
         if len(args) == 0 and self.savepath is not None:
             args = (self.savepath,)
 
-        self.render()
-        if self.figure is not None:
-            self.figure.savefig(*args, **kwargs)
+        figure = self.render()
+        if figure is not None:
+            figure.savefig(*args, **kwargs)
         else:
             raise exc.InvalidFigure("Invalid figure.")
 
@@ -136,37 +134,36 @@ class Figure():
         """
         Render and show the :class:`Figure` object.
         """
-        self.render()
-        if self.figure is not None:
-            self.figure.show()
+        figure = self.render()
+        if figure is not None:
+            figure.show()
         else:
             raise exc.InvalidFigure("Invalid figure.")
 
     def render(self):
         """
-        Actually render the figure. Update ``self.figure`` attribute, but do \
-                not show or save it.
+        Actually render the figure.
 
-        :returns: None.
+        :returns: A :mod:`matplotlib` figure object.
         """
         # Use custom matplotlib context
         with plt.rc_context(rc=custom_mpl.custom_rc(rc=self.custom_mpl_rc)):
-            if self.figure is None or self.axes is None:
-                # Create figure if necessary
-                self._render_grid()
+            # Create figure if necessary
+            figure, axes = self._render_grid()
 
             # Render depending on animation type
             if self.animation["type"] is False:
-                self._render_no_animation()
+                self._render_no_animation(axes)
             elif self.animation["type"] == "gif":
-                self._render_gif_animation()
+                self._render_gif_animation(figure, axes)
             elif self.animation["type"] == "animation":
                 # TODO
                 return None
             else:
                 return None
             # Use tight_layout to optimize layout, use custom padding
-            self.figure.tight_layout(pad=1)
+            figure.tight_layout(pad=1)  # TODO: Messes up animations
+        return figure
 
     def set_grid(self, grid_description=None,
                  height=None, width=None, ignore_groups=False,
@@ -464,7 +461,7 @@ class Figure():
 
     def _render_grid(self):
         """
-        Helper method to fill ``self.figure`` and ``self.axes`` with \
+        Helper method to create figure and axes with \
                 subplots according to the grid description.
 
         :returns: A tuple containing the figure object as first element, and \
@@ -505,9 +502,7 @@ class Figure():
             # Set the axis for every subplot
             for subplot in self.plots:
                 axes[subplot] = axis
-        # Set attributes
-        self.figure = figure
-        self.axes = axes
+        return (figure, axes)
 
     def _set_axes_properties(self, axis, group_):
         """
@@ -546,17 +541,19 @@ class Figure():
         # Set yrange
         render_helpers.set_axis_property(group_, axis.set_ylim, self.yrange)
 
-    def _render_gif_animation(self):
+    def _render_gif_animation(self, figure, axes):
         """
         Handle the render of a GIF-like animation, cycling through the plots.
 
-        :returns: A :mod:`matplotlib` figure.
+        :param figure: A :mod:`matplotlib` figure.
+        :param axes: A dict mapping the symbols of the groups to matplotlib \
+                axes as second element.
         """
         # Init
         # TODO
-        self.axes[constants.DEFAULT_GROUP].set_xlim((-2, 2))
-        self.axes[constants.DEFAULT_GROUP].set_ylim((-2, 2))
-        line, = self.axes[constants.DEFAULT_GROUP].plot([], [])
+        axes[constants.DEFAULT_GROUP].set_xlim((-2, 2))
+        axes[constants.DEFAULT_GROUP].set_ylim((-2, 2))
+        line, = axes[constants.DEFAULT_GROUP].plot([], [])
         # Define an animation function (closure)
         def animate(i):
             # TODO
@@ -565,34 +562,30 @@ class Figure():
             line.set_data(x, y)
             return line,
         # Set default kwargs
-        default_args = (self.figure, animate)
-        default_kwargs = {
-            "frames": 200,
-            "interval": 20,
-            "blit": True,
-        }
+        args = (figure, animate)
+        kwargs = constants.DEFAULT_ANIMATION_KWARGS
         # Update with overloaded arguments
-        default_args = default_args + self.animation["args"]
-        default_kwargs.update(self.animation["kwargs"])
+        args += self.animation["args"]
+        kwargs.update(self.animation["kwargs"])
         # Keep track of animation object, as it has to persist
         self.animation["persist"] = [
-            animation.FuncAnimation(*default_args, **default_kwargs)]
-        return self.figure
+            animation.FuncAnimation(*args, **kwargs)]
 
-    def _render_no_animation(self):
+    def _render_no_animation(self, axes):
         """
         Handle the render of the figure when no animation is used.
 
-        :returns: A :mod:`matplotlib` figure.
+        :param axes: A dict mapping the symbols of the groups to matplotlib \
+                axes as second element.
         """
         # Add plots
         for group_ in self.plots:
             # Get the axis corresponding to current group
             try:
-                axis = self.axes[group_]
+                axis = axes[group_]
             except KeyError:
                 # If not found, plot in the default group
-                axis = self.axes[constants.DEFAULT_GROUP]
+                axis = axes[constants.DEFAULT_GROUP]
             # Skip this plot if the axis is None
             if axis is None:
                 continue
@@ -618,4 +611,3 @@ class Figure():
                     tmp_plot.set_clip_on(False)
             # Set ax properties
             self._set_axes_properties(axis, group_)
-        return self.figure
