@@ -536,10 +536,46 @@ class Figure():
             self.legend,
             lambda: self._legend(axis, overload_legend=True)
         )
-        # Set xrange
+        # Set xrange / yrange
         render_helpers.set_axis_property(group_, axis.set_xlim, self.xrange)
-        # Set yrange
         render_helpers.set_axis_property(group_, axis.set_ylim, self.yrange)
+        # Note: Extend axes limits to have the full plot, even with large
+        # linewidths. This is necessary as we do not clip lines.
+        maximum_linewidth = max(
+            max([plt[1].get("lw", 0) for plt in self.plots[group_]]),
+            max([plt[1].get("linewidth", 0) for plt in self.plots[group_]])
+        )
+        if maximum_linewidth > 0:
+            # Only extend axes limits if linewidths is larger than the default
+            # one.
+            ticks_position = {  # Dump ticks position to restore them afterwards
+                "x": (axis.xaxis.get_majorticklocs(),
+                      axis.xaxis.get_minorticklocs()),
+                "y": (axis.yaxis.get_majorticklocs(),
+                      axis.yaxis.get_minorticklocs())
+            }
+            # Set xrange
+            extra_xrange = render_helpers.data_units_from_points(
+                maximum_linewidth,
+                axis,
+                reference="x")
+            xrange = (axis.get_xlim()[0] - extra_xrange / 2,
+                      axis.get_xlim()[1] + extra_xrange / 2)
+            render_helpers.set_axis_property(group_, axis.set_xlim, xrange)
+            # Set yrange
+            extra_yrange = render_helpers.data_units_from_points(
+                maximum_linewidth,
+                axis,
+                reference="y")
+            yrange = (axis.get_ylim()[0] - extra_yrange / 2,
+                      axis.get_ylim()[1] + extra_yrange / 2)
+            render_helpers.set_axis_property(group_, axis.set_ylim, yrange)
+            # Restore ticks
+            axis.xaxis.set_ticks(ticks_position["x"][0], minor=False)
+            axis.xaxis.set_ticks(ticks_position["x"][1], minor=True)
+            axis.yaxis.set_ticks(ticks_position["y"][0], minor=False)
+            axis.yaxis.set_ticks(ticks_position["y"][1], minor=True)
+
 
     def _render_gif_animation(self, figure, axes):
         """
