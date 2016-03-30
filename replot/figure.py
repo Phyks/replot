@@ -268,7 +268,8 @@ class Figure():
                     such scales.
             - ``orthonormal`` (boolean) to force axis to be orthonormal.
             - ``xlim`` and ``ylim`` which are tuples of intervals on the \
-                    x and y axis.
+                    x and y axis. You can also use the ``xrange`` / \
+                    ``yrange`` aliases if you find them more convenient.
             - ``invert`` (boolean) invert X and Y axis on the plot. Invert \
                     the axes labels as well.
             - ``rotate`` (angle in degrees) rotate the plot by the angle in \
