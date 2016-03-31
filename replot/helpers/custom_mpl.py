@@ -3,6 +3,8 @@ Functions to set custom :mod:`matplotlib` parameters.
 """
 import shutil
 
+import matplotlib as mpl
+
 import numpy as np
 
 
@@ -26,7 +28,7 @@ def custom_rc(rc=None):
     # Use LaTeX default font family
     # See https://stackoverflow.com/questions/17958485/matplotlib-not-using-latex-font-while-text-usetex-true
     custom_rc_["font.family"] = "serif"
-    custom_rc_["font.serif"] = "cm"
+    custom_rc_["font.serif"] = ["cm"] + mpl.rcParams["font.serif"]
     # Scale everything
     custom_rc_.update(_rc_scaling())
     # Set axes style
