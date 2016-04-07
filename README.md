@@ -85,8 +85,8 @@ design in the API, or required feature!
     <dt>Easy plotting in log scale, orthonormal axis etc</dt>
     <dd><code>replot</code> defines <code>logplot</code> and
     <code>loglogplot</code> shortcuts functions to plot in <em>log</em> scale
-    or <em>loglog</em> scale. Use `orthonormal=True` on a `plot` command to
-    plot using orthonormal axes.</dd>
+    or <em>loglog</em> scale. Use <code>orthonormal=True</code> on a
+    <code>plot</code> command to plot using orthonormal axes.</dd>
 </dl>
 
 
