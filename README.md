@@ -56,7 +56,7 @@ design in the API, or required feature!
     <code>loc="upper left"</code> in a <code>matplotlib.pyplot.legend()</code>
     call? No worry, this module aliases it for you! (same for "bottom" with
     respect to "lower"). Similarly, you can use <code>xrange</code> or
-    <code>xlim> arguments to specify axes ranges (respectively
+    <code>xlim</code> arguments to specify axes ranges (respectively
     <code>yrange</code> / <code>ylim</code>).</dd>
 
     <dt>Automatic legend</dt>
