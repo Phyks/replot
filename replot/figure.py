@@ -292,8 +292,13 @@ class Figure():
                                                   [4, 5, 6], group="a")
         """
         if len(args) == 0:
-            raise exc.InvalidParameterError(
-                "You should pass at least one argument to this function.")
+            if "x" in kwargs and "y" in kwargs:
+                args = (kwargs["x"], kwargs["y"])
+                del kwargs["x"]
+                del kwargs["y"]
+            else:
+                raise exc.InvalidParameterError(
+                    "You should pass at least one argument to this function.")
 
         # Extract custom kwargs (the ones from replot but not matplotlib) from
         # kwargs
