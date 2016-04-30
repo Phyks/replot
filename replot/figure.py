@@ -567,6 +567,7 @@ class Figure():
         render_helpers.set_axis_property(group_, set_ylabel, self.ylabel)
         # Set title
         render_helpers.set_axis_property(group_, axis.set_title, self.title)
+        axis.title.set_position((0.5, 1.05))  # Put padding between title and figure
         # Set legend
         render_helpers.set_axis_property(
             group_,

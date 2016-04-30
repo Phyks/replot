@@ -54,7 +54,7 @@ def _rc_scaling():
         # Set misc font sizes
         "font.size": 12,
         "axes.labelsize": 11,
-        "axes.titlesize": 12,
+        "axes.titlesize": 14,
         "xtick.labelsize": 10,
         "ytick.labelsize": 10,
         "legend.fontsize": 10,
