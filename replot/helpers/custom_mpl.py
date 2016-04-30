@@ -3,8 +3,8 @@ Functions to set custom :mod:`matplotlib` parameters.
 """
 import shutil
 
+import cycler
 import matplotlib as mpl
-
 import numpy as np
 
 
@@ -87,10 +87,17 @@ def _rc_axes_style():
     """
     # Use dark gray instead of black for better readability on screen
     dark_gray = ".15"
+    # Use ColorBrewer-Q10 palette as default one  TODO
+    palette = cycler.cycler(
+        "color", [
+            "#1f78b4", "#33a02c", "#e31a1c", "#ff7f00", "#6a3d9a",
+            "#a6cee3", "#b2df8a", "#fb9a99", "#fdbf6f", "#cab2d6"
+        ])
     rc_params = {
         # Colors
         "figure.facecolor": "white",
         "text.color": dark_gray,
+        "axes.prop_cycle": palette,
         # Legend
         "legend.frameon": False,  # No frame around legend
         "legend.numpoints": 1,

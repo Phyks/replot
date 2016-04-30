@@ -5,9 +5,21 @@ import cycler
 import palettable
 
 
-def default(n):
+
+COLORBREWER_Q10 = [
+    "#1f78b4", "#33a02c", "#e31a1c", "#ff7f00", "#6a3d9a",
+    "#a6cee3", "#b2df8a", "#fb9a99", "#fdbf6f", "#cab2d6"]
+COLORBREWER_Q9 = [
+    "#e41a1c", "#377eb8", "#4daf4a", "#984ea3",
+    "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"]
+TABLEAU_10 = [
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+
+
+def cubehelix(n):
     """
-    Default palette is a CubeHelix perceptual rainbow palette with length the
+    Builds a CubeHelix perceptual rainbow palette with length the
     number of plots.
 
     :param n: The number of colors in the palette.
@@ -18,14 +30,12 @@ def default(n):
         min_light=0.3, max_light=0.8, gamma=.9, n=n).mpl_colors
 
 
-def build_cycler_palette(palette, n):
+def build_cycler_palette(palette):
     """
     Build a cycler palette for the selected subplot.
 
-    :param n: number of colors in the palette.
+    :param palette: A list of colors in a format understable by \
+            matplotlib.
     :returns: a cycler object for the palette.
     """
-    if hasattr(palette, "__call__"):
-        return cycler.cycler("color", palette(n))
-    else:
-        return cycler.cycler("color", palette)
+    return cycler.cycler("color", palette)

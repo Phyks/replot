@@ -20,7 +20,9 @@ design in the API, or required feature!
     <dt>Saner default plots</dt>
     <dd>Matplotlib plots are quite ugly by default, colors are not really
     suited for optimal black and white print, or ease reading for colorblind
-    people. This module defines a clean default colorscheme to solve it.</dd>
+    people. This module defines a clean default colorscheme to solve it (based
+    on Colorbrewer Q10 palette). It also provides direct access to the
+    Tableau10 and Colorbrewer Q9 palettes.</dd>
 
     <dt>Support <code>with</code> statement</dt>
     <dd>Ever got tired of having to start any figure with a call to

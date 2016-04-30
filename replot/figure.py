@@ -26,6 +26,13 @@ from replot.helpers import plot as plot_helpers
 from replot.helpers import render as render_helpers
 
 
+PREDEFINED_PALETTES = {
+    "colorbrewerq9": rpalette.COLORBREWER_Q9,
+    "colorbrewerq10": rpalette.COLORBREWER_Q10,
+    "tableau10": rpalette.TABLEAU_10
+}
+
+
 class Figure():
     """
     The main class from :mod:`replot`, representing a figure. Can be used \
@@ -34,7 +41,7 @@ class Figure():
     def __init__(self,
                  xlabel="", ylabel="", title="",
                  xrange=None, yrange=None,
-                 palette=rpalette.default,
+                 palette=None,
                  legend=None, savepath=None, grid=None,
                  custom_mpl_rc=None):
         """
@@ -53,7 +60,10 @@ class Figure():
         :type palette: Either a list of colors (as RGB tuples) or a function \
                 to call with number of plots as parameter and which returns a \
                 list of colors (as RGB tuples). You can also pass a Seaborn \
-                palette directly, or use a Palettable Palette.mpl_colors.
+                palette directly, or use a Palettable ``Palette.mpl_colors``. \
+                You can also use ``colorbrewerq10`` (default), \
+                ``colorbrewerq9`` or ``tableau10`` to use any of these \
+                predefined palettes.
         :param legend: Whether to use a legend or not (optional). Defaults to \
                 no legend, except if labels are found on provided plots. \
                 ``False`` to disable completely. ``None`` for default \
@@ -491,20 +501,42 @@ class Figure():
                                                 colspan=colspan,
                                                 rowspan=rowspan)
                 # Set the palette for the subplot
-                axes[symbol].set_prop_cycle(
-                    rpalette.build_cycler_palette(self.palette,
-                                                  len(self.plots[symbol])))
+                palette = None
+                if self.palette is not None:
+                    if hasattr(self.palette, "__call__"):
+                        palette = self.palette(len(self.plots[symbol]))
+                    elif isinstance(self.palette, str):
+                        if self.palette in PREDEFINED_PALETTES:
+                            palette = PREDEFINED_PALETTES[self.palette]
+                        else:
+                            palette = None
+                    else:
+                        palette = self.palette
+                if palette is not None:
+                    axes[symbol].set_prop_cycle(
+                        rpalette.build_cycler_palette(palette))
             if constants.DEFAULT_GROUP not in axes:
                 # Set the default group axis to None if it is not in the grid
                 axes[constants.DEFAULT_GROUP] = None
         else:
             axis = plt.subplot2grid((1, 1), (0, 0))
             # Set the palette for the subplot
-            axis.set_prop_cycle(
-                rpalette.build_cycler_palette(
-                    self.palette,
-                    sum([len(i) for i in self.plots.values()]))
-            )
+            palette = None
+            if self.palette is not None:
+                if hasattr(self.palette, "__call__"):
+                    palette = self.palette(
+                        sum(
+                            [len(i) for i in self.plots.values()]))
+                elif isinstance(self.palette, str):
+                    if self.palette in PREDEFINED_PALETTES:
+                        palette = PREDEFINED_PALETTES[self.palette]
+                    else:
+                        palette = None
+                else:
+                    palette = self.palette
+            if palette is not None:
+                axis.set_prop_cycle(
+                    rpalette.build_cycler_palette(palette))
             # Set the axis for every subplot
             for subplot in self.plots:
                 axes[subplot] = axis
