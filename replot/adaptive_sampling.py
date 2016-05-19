@@ -96,8 +96,8 @@ def _sample_function(func, points, values=None, mask=None, tol=0.05,
         # recursion limit
         return points, values
 
-    x_a = points[..., :-1][..., mask]
-    x_b = points[..., 1:][..., mask]
+    x_a = points[:-1][mask]
+    x_b = points[1:][mask]
 
     x_c = .5*(x_a + x_b)
     y_c = np.atleast_2d(func(x_c))
